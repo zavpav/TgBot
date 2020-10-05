@@ -96,6 +96,9 @@ namespace TgBot.Bot
                 if (projectConfiguration.RedmineProject != null)
                     prj.SetRedmineInfo(projectConfiguration.RedmineProject);
 
+                if (projectConfiguration.GitName!= null)
+                    prj.GitName = projectConfiguration.GitName;
+
                 mainBot.AddProject(prj);
             }
         }

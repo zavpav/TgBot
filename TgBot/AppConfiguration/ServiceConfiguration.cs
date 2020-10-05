@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace TgBot.AppConfiguration
 {
@@ -12,5 +13,8 @@ namespace TgBot.AppConfiguration
 
         [CanBeNull]
         public JenkinsConfiguration Jenkins { get; set; }
+
+        [CanBeNull]
+        public List<GitConfiguration> Gits { get; set; }
     }
 }

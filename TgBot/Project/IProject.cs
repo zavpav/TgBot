@@ -19,6 +19,9 @@ namespace TgBot.Project
         [CanBeNull]
         string RedmineProjectName { get; }
 
+        [CanBeNull]
+        string GitName { get; set; }
+
         /// <summary> Список задач сборки </summary>
         [NotNull, ItemNotNull]
         IEnumerable<JenkinsProject.JenkinsJobInfo> Jobs { get; }
@@ -30,6 +33,8 @@ namespace TgBot.Project
         /// <summary> Текущая версия </summary>
         [NotNull]
         string VersionCurrent { get; }
+
+        string LastBuildCommitHash { get; set; }
 
         /// <summary> Обновить версию проекта </summary>
         Task UpdateVersion(CancellationToken cancellationToken);

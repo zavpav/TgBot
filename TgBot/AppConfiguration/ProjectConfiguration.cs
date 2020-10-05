@@ -7,6 +7,7 @@ namespace TgBot.AppConfiguration
 {
     public class ProjectConfiguration
     {
+        /// <summary> Наименование проекта </summary>
         [CanBeNull]
         public string ProjectName { get; set; }
 
@@ -21,6 +22,10 @@ namespace TgBot.AppConfiguration
         public string JenkinsPrefix { get; set; }
         
         public string RedmineProject { get; set; }
+
+        /// <summary> Описание получения данных из Гита </summary>
+        [CanBeNull]
+        public string GitName { get; set; }
 
         public class JenkinsJobConfiguration
         {

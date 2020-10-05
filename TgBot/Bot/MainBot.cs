@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
+using TgBot.Bot.ConversationUnbuilded;
 using TgBot.Bot.ConversationVersion;
 using TgBot.Logger;
 using TgBot.Project;
@@ -33,6 +34,10 @@ namespace TgBot.Bot
         /// <summary> Ссылка на redmine </summary>
         [NotNull]
         IRedmineService RedmineService { get; }
+
+        [CanBeNull]
+        IGitService GitService { get; }
+
 
         /// <summary> Добавить "проект" в бот </summary>
         void AddProject([NotNull] IProject project);
@@ -71,22 +76,45 @@ namespace TgBot.Bot
         [NotNull]
         private Lazy<ITgClientService> TgService { get; }
 
+        /// <summary> Сервис гита </summary>
+        [NotNull]
+        private Lazy<IGitService> GitService { get; }
+
+        /// <summary> Настройки </summary>
+        [NotNull]
+        private AppConfiguration.AppConfiguration Configuration { get; }
+
         /// <summary> Сервис redmine </summary>
         [NotNull]
         public IRedmineService RedmineService => this._redmineService.Value;
+
+        IGitService IMainBot.GitService => this.GitService.Value;
 
         /// <summary> Логгер </summary>
         [NotNull]
         private ILog Logger { get; }
 
-        public MainBot([NotNull] Lazy<ITgClientService> tgService, [NotNull] Lazy<IRedmineService> redmineService, [NotNull] ILog logger)
+        public MainBot([NotNull] Lazy<ITgClientService> tgService, 
+                    [NotNull] Lazy<IRedmineService> redmineService, 
+                    [NotNull] Lazy<IGitService> gitService,
+                    [NotNull] AppConfiguration.AppConfiguration configuration,
+                    [NotNull] ILog logger)
         {
             this.TgService = tgService;
+            this.GitService = gitService;
+            this.Configuration = configuration;
             this._redmineService = redmineService;
             this.Logger = logger;
             this.AllProjects = new List<IProject>();
             this.AllUsers = new List<User>();
             this.AllGroups = new List<Group>();
+
+            this.ConversationFactories = new List<IConversationFactory>
+            {
+                new GroupVersionConversationFactory(),
+                new UserVersionConversationFactory(),
+                new UserUnbuildedConversationFactory()
+            };
             this.IsStarting = true;
         }
 
@@ -98,6 +126,9 @@ namespace TgBot.Bot
 
             var background = new List<Task>();
             this.IsStarting = true;
+
+            this.GitService.Value.Pull();
+
 
             var cancelTokenSource = new CancellationTokenSource();
             var cancelToken = cancelTokenSource.Token;
@@ -123,6 +154,8 @@ namespace TgBot.Bot
             while (true)
             {
                 await Task.Delay(5000);
+                //// Обновляем гит, что б коммиты искать
+                //await this.GitService.Value.Pull();
 
                 // Обновляем таски отдельно, что б потом в джобах норм было
                 await this.RedmineService.UpdateTasks();
@@ -319,12 +352,7 @@ namespace TgBot.Bot
 
 
         /// <summary> Типы диалогов </summary>
-        private List<IConversationFactory> ConversationFactories { get; } = new List<IConversationFactory>
-        {
-            new GroupVersionConversationFactory(),
-            new UserVersionConversationFactory()
-
-        };
+        private List<IConversationFactory> ConversationFactories { get; }
 
         /// <summary> Открытые диалоги </summary>
         private ConcurrentDictionary<ITgUser, IConversation> Conversations { get; } = new ConcurrentDictionary<ITgUser, IConversation>();

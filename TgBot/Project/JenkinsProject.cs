@@ -73,6 +73,9 @@ namespace TgBot.Project
 
         public string VersionCurrent { get; private set; }
 
+        public string LastBuildCommitHash { get; set; } = "6b7dad96ad0c872b588f4b44cdca97cae0c69a92";
+
+
         private DateTime _lastUpdateVersion;
 
         /// <summary> Пинание сервисов работы с серверами (jenkins, git, redmine) </summary>
@@ -392,5 +395,9 @@ namespace TgBot.Project
         /// <summary> Установка информации для получения версии из jenkins </summary>
         [CanBeNull]
         public string JenkinsPrefix { get; set; }
+
+        /// <summary> Имя сервиса гита </summary>
+        [CanBeNull]
+        public string GitName { get; set; }
     }
 }
