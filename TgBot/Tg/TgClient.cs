@@ -13,7 +13,10 @@ namespace TgBot.Tg
     public interface ITgClientService
     {
         /// <summary> Выслать сообщение </summary>
-        Task SendMessage(long tgChatId, [NotNull] string message);
+        Task<int> SendMessage(long tgChatId, [NotNull] string message);
+
+        /// <summary> Обновить соощение </summary>
+        Task EditMessage(long tgChatId, int messageId, string message);
 
         /// <summary> Проверить новые сообщения </summary>
         Task Pull();
@@ -56,10 +59,17 @@ namespace TgBot.Tg
         {
         }
 
-        public async Task SendMessage(long tgChatId, string message)
+        public async Task<int> SendMessage(long tgChatId, string message)
         {
             var chatId = new ChatId(tgChatId);
-            await this.TelegramClient.SendTextMessageAsync(chatId, message, ParseMode.Html);
+            var msg = await this.TelegramClient.SendTextMessageAsync(chatId, message, ParseMode.Html);
+            return msg.MessageId;
+        }
+
+        public async Task EditMessage(long tgChatId, int messageId, string message)
+        {
+            
+            var aa = await this.TelegramClient.EditMessageTextAsync(tgChatId, messageId, message, ParseMode.Html);
         }
 
         public async Task Pull()

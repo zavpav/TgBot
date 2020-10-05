@@ -29,7 +29,6 @@ namespace TgBot.Bot.ConversationVersion
         public class UserVersionConversation : IConversation
         {
             private IMainBot MainBot { get; }
-
             public ITgUser TgUser { get; }
             public string FirstMessage { get; }
 

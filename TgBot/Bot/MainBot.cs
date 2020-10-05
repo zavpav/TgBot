@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using TgBot.Bot.ConversationUnbuilded;
 using TgBot.Bot.ConversationVersion;
+using TgBot.Bot.StatLongTimeConversation;
 using TgBot.Logger;
 using TgBot.Project;
 using TgBot.Services;
@@ -61,7 +62,9 @@ namespace TgBot.Bot
         /// <summary> Завершить диалог для пользователя </summary>
         void FinishDialog([NotNull] ITgUser tgUser);
 
-        Task DirectSendMessage([NotNull] ITgUser tgUser, [NotNull] string message);
+        Task<int> DirectSendMessage([NotNull] ITgUser tgUser, [NotNull] string message);
+        
+        Task EditMessageText([NotNull] ITgUser tgUser, int messageId, [NotNull] string message);
     }
 
     /// <summary>
@@ -113,7 +116,8 @@ namespace TgBot.Bot
             {
                 new GroupVersionConversationFactory(),
                 new UserVersionConversationFactory(),
-                new UserUnbuildedConversationFactory()
+                new UserUnbuildedConversationFactory(),
+                new UserStatLongTimeConversationFactory()
             };
             this.IsStarting = true;
         }
@@ -394,9 +398,14 @@ namespace TgBot.Bot
             this.Conversations.TryRemove(tgUser, out _);
         }
 
-        public async Task DirectSendMessage(ITgUser tgUser, string message)
+        public async Task<int> DirectSendMessage(ITgUser tgUser, string message)
         {
-            await this.TgService.Value.SendMessage(tgUser.TgId.Value, message);
+            return await this.TgService.Value.SendMessage(tgUser.TgId.Value, message);
+        }
+
+        public async Task EditMessageText(ITgUser tgUser, int messageId, string message)
+        {
+            await this.TgService.Value.EditMessage(tgUser.TgId.Value, messageId, message);
         }
     }
 }
